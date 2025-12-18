@@ -15,6 +15,8 @@ class Certificate(db.Model):
     valid_from: Mapped[datetime] = mapped_column(nullable=False)
     valid_to: Mapped[datetime] = mapped_column(nullable=False)
     company: Mapped[Optional[str]] = mapped_column(nullable=True)
+    key: Mapped[str] = mapped_column(nullable=False)
+    crt: Mapped[str] = mapped_column(nullable=False)
 
     # Chave Estrangeira
     ca_id: Mapped[int] = mapped_column(ForeignKey("cacertificates.id"), nullable=False)
@@ -36,5 +38,8 @@ class Certificate(db.Model):
             "valid_from": self.valid_from,
             "valid_to": self.valid_to,
             "company": self.company,
-            "sans": sans_str
+            "sans": sans_str,
+            "key": self.key,
+            "crt": self.crt
+
         }

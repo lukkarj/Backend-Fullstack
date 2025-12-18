@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -16,6 +17,8 @@ class CACertificate(db.Model):
     state: Mapped[str] = mapped_column(nullable=False)
     locality: Mapped[str] = mapped_column(nullable=False)
     country: Mapped[str] = mapped_column(nullable=False)
+    key: Mapped[str] = mapped_column(nullable=False)
+    crt: Mapped[str] = mapped_column(nullable=False)
 
     # Relacionamentos
     certificates = relationship("Certificate", back_populates="issuer")
@@ -31,4 +34,6 @@ class CACertificate(db.Model):
             "state": self.state,
             "locality": self.locality,
             "country": self.country,
+            "key": self.key,
+            "crt": self.crt
         }
