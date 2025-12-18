@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 
 class CertificateFetch(BaseModel):
-    # Schema dos dados recebidos para fazer o discovery
+    # Schema dos dados de entrada para fazer o discovery
     commonName: str
     port: int
 
@@ -16,16 +16,25 @@ class CertificateStruct(BaseModel):
     company: Optional[str]
     sans: Optional[str]
 
+class CertKeysRequest(BaseModel):
+    # Schema dos dados de entrada para fazer o download dos certificados de CA
+    id: int
+
+class CertKeysReply(BaseModel):
+    # Schema dos dados de saída para fazer o download dos certificados de CA
+    crt: str
+    key: str
+
 class CertificateDelete(BaseModel):
-    # Schema dos dados recebidos para deletar um certificado
+    # Schema dos dados de entrada para deletar um certificado
     id: int
 
 class CertificateRenewal(BaseModel):
-    # Schema dos dados recebidos para renovar um certificado
+    # Schema dos dados de entrada para renovar um certificado
     id: int
 
 class DeleteResult(BaseModel):
-    # Schema do resultado da remoção de um certificado
+    # Schema dos dados de saída da remoção de um certificado
     succeed: bool
 
 class CertificateList(BaseModel):
@@ -33,16 +42,16 @@ class CertificateList(BaseModel):
     certificates:List[CertificateStruct]
 
 class GenerateCert(BaseModel):
-    # Schema dos dados recebidos para gerar um certificado
+    # Schema dos dados de entrada para gerar um certificado
     ca: int
     company: Optional[str]
     commonName: str
     sans: Optional[str]
 
 class CertificateFilter(BaseModel):
-    # Schema dos dados recebidos filtrar a lista de certificados
+    # Schema dos dados de entrada para filtrar a lista de certificados
     ca_id: int
 
 class CertificateSearch(BaseModel):
-    # Schema dos dados recebidos buscar certificados
+    # Schema dos dados de entrada para buscar certificados
     searchString: str

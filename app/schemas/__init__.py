@@ -1,7 +1,32 @@
-from app.schemas.caCertificatesSchema import CACertificateStruct, CACertificateList, GenerateCACertificate, CACertificateDelete, CADeleteResult
-from app.schemas.certificatesSchema import CertificateFetch, CertificateStruct, CertificateList, GenerateCert, CertificateDelete, DeleteResult, CertificateRenewal, CertificateFilter, CertificateSearch
+from app.schemas.caCertificatesSchema import (
+    CACertificateStruct,
+    CACertificateList,
+    GenerateCACertificate,
+    CACertificateDelete,
+    CADeleteResult,
+    CAKeysRequest,
+    CAKeysReply,
+)
+from app.schemas.certificatesSchema import (
+    CertificateFetch,
+    CertificateStruct,
+    CertificateList,
+    GenerateCert,
+    CertificateDelete,
+    DeleteResult,
+    CertificateRenewal,
+    CertificateFilter,
+    CertificateSearch,
+    CertKeysRequest,
+    CertKeysReply,
+)
 from app.schemas.errorSchema import Error
-from app.schemas.requestSchema import RequestSubject, RequestDecodeIn, RequestDecodeOut, RequestOutput
+from app.schemas.requestSchema import (
+    RequestSubject,
+    RequestDecodeIn,
+    RequestDecodeOut,
+    RequestOutput,
+)
 
 __all__ = [
     "CACertificateStruct",
@@ -9,6 +34,8 @@ __all__ = [
     "GenerateCACertificate",
     "CACertificateDelete",
     "CADeleteResult",
+    "CAKeysRequest",
+    "CAKeysReply",
     "CertificateFetch",
     "CertificateStruct",
     "CertificateList",
@@ -17,10 +44,12 @@ __all__ = [
     "DeleteResult",
     "CertificateRenewal",
     "CertificateFilter",
+    "CertKeysRequest",
+    "CertKeysReply",
     "CertificateSearch",
     "Error",
     "RequestSubject",
     "RequestDecodeIn",
     "RequestDecodeOut",
-    "RequestOutput"
+    "RequestOutput",
 ]

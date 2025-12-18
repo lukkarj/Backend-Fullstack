@@ -13,12 +13,21 @@ class CACertificateStruct(BaseModel):
     locality: str
     country: str
 
+class CAKeysRequest(BaseModel):
+    # Schema dos dados de entrada para fazer o download dos certificados de CA
+    id: int
+
+class CAKeysReply(BaseModel):
+    # Schema dos dados de saída para fazer o download dos certificados de CA
+    # O usuário não tem acesso à chave privativa dos certificados de CA, é enviado apenas o .crt
+    crt: str
+
 class CACertificateDelete(BaseModel):
-    # Schema dos dados recebidos para deletar um certificado de CA
+    # Schema dos dados de entrada para deletar um certificado de CA
     id: int
 
 class CADeleteResult(BaseModel):
-    # Schema do resultado da remoção de um certificado de CA
+    # Schema dos dados de saída da remoção de um certificado de CA
     succeed: bool
 
 class CACertificateList(BaseModel):
@@ -26,7 +35,7 @@ class CACertificateList(BaseModel):
     certificates:List[CACertificateStruct]
 
 class GenerateCACertificate(BaseModel):
-    # Schema dos dados recebidos para gerar um certificado de CA
+    # Schema dos dados de entrada para gerar um certificado de CA
     company: str
     commonName: str
     locality: str
