@@ -46,7 +46,7 @@ Você também poderá:
 
 # Nota do desenvolvedor
 
-Por se tratar de um protótipo, esta versão v1.0 ainda não conta com login de usuário de e proteção dos arquivos de certificado e chave privativa.
+Por se tratar de um protótipo, esta versão v1.0 ainda não conta com login de usuário de e proteção dos dados.
 
 
 
