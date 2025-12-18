@@ -34,7 +34,7 @@ O aplicativo está configurado para rodar em modo DEBUG.
 
 Para começar a usar o My Private CA Manager o primeiro passo será gerar um certificado CA. 
 
-Após gerar o certificado CA você poderá fazer o download do certificado para a instalação nas aplicações que farão uso do certificado de modo que não receba erro de "não seguro".
+Após gerar o certificado CA, você poderá fazer o download do certificado para a instalação nas aplicações que farão uso do certificado de modo que não receba erro de "não seguro".
 
 Agora você poderá gerar os certificados necessários para seus ambientes internos.
 
@@ -46,7 +46,7 @@ Você também poderá:
 
 # Nota do desenvolvedor
 
-Por se tratar de um protótipo esta versão v1.0 ainda não conta com login de usuário de e proteção dos arquivos de certificado e chave privativa.
+Por se tratar de um protótipo, esta versão v1.0 ainda não conta com login de usuário de e proteção dos arquivos de certificado e chave privativa.
 
 
 
