@@ -102,11 +102,40 @@ def routes(app):
                 return {"list": []}, 200
             else:
                 cert_list = [certificate.format_certificate() for certificate in certificates]
-
         except SQLAlchemyError as error:
             return jsonify({"message": "Database error"}), 500
         return {
             "list": cert_list,
+        }, 200
+
+    @app.get("/getCAFiles", tags=[certificate_tag], responses={200: CAKeysReply, 404: Error, 500: Error})
+    def get_ca_certificates(query: CAKeysRequest):
+        # Busca o certificado de CA e devolve o arquivo crt
+        try:
+            # Busca a CA selecionada
+            ca_certificate = (CACertificate.query.filter(CACertificate.id == query.id)).first()
+            if not ca_certificate:
+                return {"message": "CA não encontrada"}, 404
+        except SQLAlchemyError as error:
+            return jsonify({"message": error}), 500
+        return {
+            "crt": ca_certificate.crt
+        }, 200
+
+    @app.get("/getCertFiles", tags=[certificate_tag], responses={200: CertKeysReply, 404: Error, 500: Error})
+    def get_certificates(query: CertKeysRequest):
+        # Busca o certificado e devolve os arquivos key e crt
+        print(query.id)
+        try:
+            # Busca a CA selecionada
+            certificate = (Certificate.query.filter(Certificate.id == query.id)).first()
+            if not certificate:
+                return {"message": "Certificado não encontrado"}, 404
+        except SQLAlchemyError as error:
+            return jsonify({"message": error}), 500
+        return {
+            "crt": certificate.crt,
+            "key": certificate.key
         }, 200
 
     # ======================================================
@@ -173,6 +202,22 @@ def routes(app):
     # Deleta certificado selecionado
         try:
             to_delete=db.session.get(Certificate, body.id)
+        except SQLAlchemyError as error:
+            return jsonify({"message": "Database error"}), 500
+
+        if to_delete:
+            db.session.delete(to_delete)
+            db.session.commit()
+            return {
+                "succeed": True,
+            }, 200
+        return jsonify({"message": "Database error"}), 500
+
+    @app.delete("/deleteCA", tags=[certificate_tag], responses={200: DeleteResult, 500: Error})
+    def delete_ca(body: CACertificateDelete):
+        # Deleta certificado CA selecionado
+        try:
+            to_delete = db.session.get(CACertificate, body.id)
         except SQLAlchemyError as error:
             return jsonify({"message": "Database error"}), 500
 

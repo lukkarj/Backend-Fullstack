@@ -44,7 +44,7 @@ def generate_request(subject):
         return {"error": f"Campos não preenchidos corretamente: {e}", "code": 400}
     except Exception as e:
         return {"error": f"Operação não realizada: {e}", "code": 500}
-
+    print(to_reply)
     return to_reply
 
 
@@ -73,5 +73,4 @@ def process_decode(csr):
         return {"error": f"Campos não preenchidos corretamente: {e}", "code": 400}
     except Exception as e:
         return {"error": f"Operação não realizada: {e}", "code": 500}
-
     return csr_data

@@ -2,7 +2,10 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidKey
+from sqlalchemy.exc import SQLAlchemyError
+
 import datetime
 import os
 
@@ -19,6 +22,15 @@ def issue_cacertificate(subject):
                 public_exponent=65537,
                 key_size=4096,
             )
+
+        private_key_bytes = root_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+
+        private_key_pem = private_key_bytes.decode("utf-8")
+
         # Monta atributos
         subject = issuer = x509.Name([
             x509.NameAttribute(NameOID.COUNTRY_NAME, subject.country),
@@ -61,22 +73,16 @@ def issue_cacertificate(subject):
             critical=False,
         ).sign(root_key, hashes.SHA256())
 
-        # Salva certificado na pasta ainda sem o ID
-        with open("app/extras/temp.crt", "wb") as f:
-            f.write(root_cert.public_bytes(serialization.Encoding.PEM))
-        # Salva a chave privativa na pasta ainda sem o ID
-        with open("app/extras/temp.key", "wb") as f:
-            f.write(root_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption(),
-            ))
     except InvalidKey as e:
         return {"error": f"Erro na geração das chaves: {e}", "code": 400}
     except ValueError as e:
         return {"error": f"Campos não preenchidos corretamente: {e}", "code": 400}
     except Exception as e:
         return {"error": f"Operação não realizada: {e}", "code": 500}
+
+    crt_pem = root_cert.public_bytes(
+        encoding=serialization.Encoding.PEM
+    ).decode("utf-8")
 
     # Envia para a função que irá pegar os dados de dentro do certificado
     parsed = parse_certificate(root_cert)
@@ -89,6 +95,8 @@ def issue_cacertificate(subject):
         locality=parsed.get("locality"),
         state=parsed.get("state"),
         country=parsed.get("country"),
+        key=private_key_pem,
+        crt=crt_pem
     )
 
     try:
@@ -97,30 +105,26 @@ def issue_cacertificate(subject):
     except Exception as e:
         return {"error": f"Erro ao salvar: {e}", "code": 400}
 
-    crt_temp = "app/extras/temp.crt"
-    key_temp = "app/extras/temp.key"
-
-    crt_path = f"app/extras/{cacertificate.id}.crt"
-    key_path = f"app/extras/{cacertificate.id}.key"
-
-    # Renomeia os arquivos com o ID do certificado
-    os.rename(crt_temp, crt_path)
-    os.rename(key_temp, key_path)
-
     return cacertificate.id
 
 
 def issue_certificate(body):
     try:
         # Importa chave privativa da CA
-        with open(f"app/extras/{body.ca}.key", "rb") as f:
-            ca_private_key = serialization.load_pem_private_key(
-                f.read(),
-                password=None,  # chave não criptografada com senha
-            )
-        # Importa certificado da CA
-        with open(f"app/extras/{body.ca}.crt", "rb") as f:
-            ca_cert = x509.load_pem_x509_certificate(f.read())
+
+        try:
+            ca = db.session.get(CACertificate, body.ca)
+        except SQLAlchemyError as error:
+            return ({"error": "Database error"}), 500
+
+        ca_key_string=ca.key
+        ca_private_key = serialization.load_pem_private_key(
+            ca_key_string.encode(),
+            password=None,
+        )
+        # Importa o certificado CA
+        ca_crt_string = ca.crt
+        ca_cert = x509.load_pem_x509_certificate(ca_crt_string.encode(), default_backend())
 
         # Gera chave privativa
         key = rsa.generate_private_key(
@@ -128,13 +132,13 @@ def issue_certificate(body):
             key_size=2048,
         )
 
-        # Salva a chave privativa na pasta ainda sem o ID
-        with open("app/files/keys/temp.key", "wb") as f:
-            f.write(key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.BestAvailableEncryption(b"passphrase"),
-            ))
+        private_key_bytes = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+
+        private_key_pem = private_key_bytes.decode("utf-8")
 
         # Monta o campo Subject(Assunto)
         subject = x509.Name(
@@ -168,18 +172,9 @@ def issue_certificate(body):
         .add_extension(x509.SubjectAlternativeName(sans_names),critical=False,)
         .sign(ca_private_key, hashes.SHA256())
     )
-
-
-    # Salva o certificado na pasta ainda sem o ID
-    try:
-        with open("app/files/crts/temp.crt", "wb") as f:
-            f.write(cert.public_bytes(serialization.Encoding.PEM))
-    except PermissionError as e:
-        return {"error": f"Certificado não pode ser salvo: {e}", "code": 400}
-    except FileNotFoundError as e:
-        return {"error": f"Certificado não pode ser salvo: {e}", "code": 400}
-    except OSError as e:
-        return {"error": f"Operação não realizada: {e}", "code": 500}
+    crt_pem = cert.public_bytes(
+        encoding=serialization.Encoding.PEM
+    ).decode("utf-8")
 
     # Envia para a função que irá pegar os dados de dentro do certificado
     parsed = parse_certificate(cert)
@@ -190,6 +185,8 @@ def issue_certificate(body):
         valid_to=parsed.get("not_after"),
         company=parsed.get("organization"),
         ca_id=body.ca,
+        key=private_key_pem,
+        crt=crt_pem
     )
 
     try:
@@ -204,16 +201,6 @@ def issue_certificate(body):
         db.session.commit()
     except Exception as e:
         return {"error": f"Erro ao salvar: {e}", "code": 400}
-
-    crt_temp = "app/files/crts/temp.crt"
-    key_temp = "app/files/keys/temp.key"
-
-    crt_path = f"app/files/crts/{certificate.id}.crt"
-    key_path = f"app/files/keys/{certificate.id}.key"
-
-    # Renomeia os arquivos com o ID do certificado
-    os.rename(crt_temp, crt_path)
-    os.rename(key_temp, key_path)
 
     return certificate.id
 
