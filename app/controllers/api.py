@@ -125,7 +125,6 @@ def routes(app):
     @app.get("/getCertFiles", tags=[certificate_tag], responses={200: CertKeysReply, 404: Error, 500: Error})
     def get_certificates(query: CertKeysRequest):
         # Busca o certificado e devolve os arquivos key e crt
-        print(query.id)
         try:
             # Busca a CA selecionada
             certificate = (Certificate.query.filter(Certificate.id == query.id)).first()
