@@ -24,11 +24,11 @@ A documentação da API do My Private CA Manager pode ser consultada através do
 
 Para utilizar o My Private CA Manager será necessário fazer a instalação das bibliotecas (libs) Python listadas no documento requirements.txt
 
-A instalação pode ser realizada rodando o seguinte comando: `--pip install -r requirements.txt--`
+A instalação pode ser realizada rodando o seguinte comando: `pip install -r requirements.txt`
 
-Uma vez concluída a instalação, basta rodar o comando `--python main.py--` para rodar o My Private CA Manager localmente.
+Uma vez concluída a instalação, basta rodar o comando `python main.py` para rodar o My Private CA Manager localmente.
 
-O aplicativo está configurado para rodar em modo DEBUG.
+OBS.: O aplicativo está configurado para rodar em modo DEBUG.
 
 # Primeiros passos
 
